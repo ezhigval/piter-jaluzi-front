@@ -1,0 +1,26 @@
+---
+import config from '../../data/config.json';
+const navLinks = [{ href: '/catalog', text: 'Каталог' }, { href: '/#repair', text: 'Ремонт' }, { href: '/#about', text: 'О нас' }, { href: '/#contacts', text: 'Контакты' }];
+---
+<header class="header">
+  <nav class="header-nav">
+    <a href="/" class="header-logo">{config.company.name}</a>
+    <div id="nav-desktop" class="header-desktop">
+      {navLinks.map(link => (<a href={link.href} class="header-link">{link.text}</a>))}
+      <a href={`tel:${config.company.phone}`} class="header-phone">{config.company.phone}</a>
+      <button data-open-order-modal class="header-btn">Заказать</button>
+    </div>
+    <button id="mobile-menu-btn" class="mobile-menu-btn" aria-label="Меню">☰</button>
+  </nav>
+</header>
+
+<div id="mobile-menu" class="mobile-menu">
+  <div class="mobile-menu-content">
+    <div style="display:flex;justify-content:flex-end;">
+      <button id="mobile-menu-close" class="mobile-menu-close">✕ Закрыть</button>
+    </div>
+    {navLinks.map(link => (<a href={link.href} class="mobile-menu-link">{link.text}</a>))}
+    <a href={`tel:${config.company.phone}`} class="mobile-menu-link">📞 {config.company.phone}</a>
+    <button data-open-order-modal class="btn btn-primary" style="width:100%;margin-top:1rem;">Заказать жалюзи</button>
+  </div>
+</div>

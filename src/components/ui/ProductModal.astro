@@ -1,0 +1,16 @@
+---
+const { product, onClose } = Astro.props;
+---
+<div class="product-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);z-index:100;align-items:center;justify-content:center;padding:2rem;" onclick="this.style.display='none'">
+  <div style="background:white;max-width:600px;width:100%;border-radius:1rem;overflow:hidden;position:relative;" onclick="event.stopPropagation()">
+    <button onclick="this.closest('.product-modal').style.display='none'" style="position:absolute;top:1rem;right:1rem;background:white;border:none;font-size:1.5rem;cursor:pointer;width:2.5rem;height:2.5rem;border-radius:50%;box-shadow:0 2px 4px rgba(0,0,0,0.1);">×</button>
+    <img src={product.image} alt={product.name} style="width:100%;height:300px;object-fit:cover;" />
+    <div style="padding:2rem;">
+      <span style="color:#2563EB;font-weight:500;font-size:0.875rem;">{product.category}</span>
+      <h2 style="font-size:1.75rem;margin:0.5rem 0;color:#0F172A;">{product.name}</h2>
+      <p style="color:#64748B;margin:1rem 0;line-height:1.6;">{product.description}</p>
+      <div style="font-size:1.5rem;font-weight:bold;color:#0F172A;margin:1.5rem 0;">от {product.price} ₽/м²</div>
+      <a href="#contacts" onclick="this.closest('.product-modal').style.display='none'" style="display:block;text-align:center;padding:1rem;background:#2563EB;color:white;text-decoration:none;border-radius:0.5rem;font-weight:600;">Заказать</a>
+    </div>
+  </div>
+</div>

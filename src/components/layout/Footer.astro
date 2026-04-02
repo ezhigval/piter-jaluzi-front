@@ -1,0 +1,33 @@
+---
+import config from '../../data/config.json';
+const currentYear = new Date().getFullYear();
+---
+<footer style="background:#1E293B;color:#94A3B8;padding:3rem 1.5rem;">
+  <div style="max-width:1200px;margin:0 auto;">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:2rem;margin-bottom:2rem;">
+      <div>
+        <h3 style="font-size:1.25rem;font-weight:bold;color:#2563EB;margin-bottom:1rem;">{config.company.name}</h3>
+        <p style="color:#94A3B8;font-size:0.95rem;">Производство и установка жалюзи с {config.company.since} года</p>
+      </div>
+      <div>
+        <h4 style="font-weight:600;margin-bottom:1rem;color:#F1F5F9;font-size:1rem;">Каталог</h4>
+        <ul style="list-style:none;padding:0;display:flex;flex-direction:column;gap:0.5rem;">
+          <li><a href="/catalog" style="text-decoration:none;color:#94A3B8;font-size:0.95rem;">Рулонные</a></li>
+          <li><a href="/catalog" style="text-decoration:none;color:#94A3B8;font-size:0.95rem;">Вертикальные</a></li>
+          <li><a href="/catalog" style="text-decoration:none;color:#94A3B8;font-size:0.95rem;">Горизонтальные</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 style="font-weight:600;margin-bottom:1rem;color:#F1F5F9;font-size:1rem;">Контакты</h4>
+        <ul style="list-style:none;padding:0;display:flex;flex-direction:column;gap:0.5rem;">
+          <li><a href={`tel:${config.company.phone}`} style="text-decoration:none;color:#94A3B8;font-size:0.95rem;">{config.company.phone}</a></li>
+          <li><a href={`mailto:${config.company.email}`} style="text-decoration:none;color:#94A3B8;font-size:0.95rem;">{config.company.email}</a></li>
+          <li style="color:#94A3B8;font-size:0.95rem;">{config.company.address}</li>
+        </ul>
+      </div>
+    </div>
+    <div style="border-top:1px solid #334155;padding-top:2rem;text-align:center;color:#64748B;font-size:0.9rem;">
+      <p>© {currentYear} {config.company.name}. Все права защищены.</p>
+    </div>
+  </div>
+</footer>

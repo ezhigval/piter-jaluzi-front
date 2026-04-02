@@ -1,0 +1,88 @@
+---
+import config from '../../data/config.json';
+---
+<section id="contacts" class="section" style="background:var(--color-bg);">
+  <div class="container">
+    <h2 class="section-title">Контакты</h2>
+    
+    <div class="contacts-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-bottom:3rem;">
+      <div class="contacts-map" style="background:white;padding:0.5rem;border-radius:1rem;box-shadow:var(--shadow-md);overflow:hidden;height:400px;">
+        <div id="yandex-map" style="width:100%;height:100%;"></div>
+      </div>
+      
+      <div class="contacts-info" style="background:white;padding:2rem;border-radius:1rem;box-shadow:var(--shadow-md);">
+        <h3 style="font-size:1.25rem;margin-bottom:1.5rem;color:var(--color-text);">Наши контакты</h3>
+        
+        <div style="margin-bottom:1.5rem;">
+          <div style="display:flex;align-items:flex-start;gap:1rem;margin-bottom:1.25rem;">
+            <span style="font-size:1.25rem;">📍</span>
+            <div>
+              <div style="font-weight:600;color:var(--color-text);margin-bottom:0.25rem;font-size:0.9rem;">Адрес:</div>
+              <div style="color:var(--color-text-muted);font-size:0.95rem;">{config.company.address}</div>
+            </div>
+          </div>
+          
+          <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.25rem;">
+            <span style="font-size:1.25rem;">📞</span>
+            <div>
+              <a href={`tel:${config.company.phone}`} style="font-weight:600;color:var(--color-primary);text-decoration:none;font-size:1.1rem;">{config.company.phone}</a>
+            </div>
+          </div>
+          
+          <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;">
+            <span style="font-size:1.25rem;">✉️</span>
+            <div>
+              <a href={`mailto:${config.company.email}`} style="color:var(--color-text-muted);text-decoration:none;font-size:0.95rem;">{config.company.email}</a>
+            </div>
+          </div>
+        </div>
+        
+        <button data-open-order-modal style="display:block;width:100%;text-align:center;padding:1rem;background:var(--color-primary);color:white;border:none;border-radius:0.5rem;font-weight:600;font-size:1rem;cursor:pointer;box-shadow:0 4px 6px rgba(37,99,235,0.3);">Заказать жалюзи</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  // Yandex Maps
+  (function() {
+    const mapContainer = document.getElementById('yandex-map');
+    if (!mapContainer) return;
+    
+    const script = document.createElement('script');
+    script.src = 'https://api-maps.yandex.ru/2.1/?lang=ru_RU';
+    script.async = true;
+    script.onload = function() {
+      if (typeof ymaps === 'undefined') return;
+      
+      ymaps.ready(function() {
+        // Координаты: Санкт-Петербург, Боровая 52А
+        var myMap = new ymaps.Map('yandex-map', {
+          center: [59.914195, 30.344461],
+          zoom: 17,
+          controls: ['zoomControl', 'fullscreenControl']
+        });
+        
+        var myPlacemark = new ymaps.Placemark([59.914195, 30.344461], {
+          hintContent: 'ПроЖалюзи',
+          balloonContent: '<strong>ПроЖалюзи</strong><br>Санкт-Петербург, Боровая 52А<br>📞 {config.company.phone}'
+        }, {
+          preset: 'islands#blueStretchyIcon'
+        });
+        
+        myMap.geoObjects.add(myPlacemark);
+        myMap.setCenter([59.914195, 30.344461], 17);
+      });
+    };
+    
+    document.head.appendChild(script);
+  })();
+</script>
+
+<style>
+  @media (max-width: 768px) {
+    .contacts-grid { grid-template-columns: 1fr !important; }
+    .contacts-map { order: 1; height: 300px; }
+    .contacts-info { order: 2; }
+  }
+</style>

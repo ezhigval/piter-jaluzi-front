@@ -1,0 +1,378 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/layout/Header.astro';
+import Footer from '../components/layout/Footer.astro';
+import OrderModal from '../components/ui/OrderModal.astro';
+import config from '../data/config.json';
+
+const API_URL = import.meta.env.PUBLIC_API_URL || 'http://localhost:3001';
+
+let works = [];
+let reviews = [];
+let loadError = false;
+
+try {
+  const [worksRes, reviewsRes] = await Promise.all([
+    fetch(API_URL + '/api/reviews/works'),
+    fetch(API_URL + '/api/reviews')
+  ]);
+  
+  const worksData = await worksRes.json();
+  const reviewsData = await reviewsRes.json();
+  
+  if (worksData.success) works = worksData.data;
+  if (reviewsData.success) reviews = reviewsData.data;
+} catch (error) {
+  console.error('Failed to load works/reviews:', error);
+  loadError = true;
+}
+---
+<BaseLayout 
+  title={`Наши работы и отзывы | ${config.company.name}`}
+  description="Посмотрите наши выполненные работы и отзывы клиентов. Реальные фото установленных жалюзи."
+  canonical="/works-reviews"
+>
+  <OrderModal />
+  <Header />
+  
+  <main>
+    <!-- Hero Section -->
+    <section class="section" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 4rem 0;">
+      <div class="container" style="text-align: center;">
+        <h1 style="font-size: 2.5rem; margin-bottom: 1rem;">Наши работы и отзывы</h1>
+        <p style="font-size: 1.2rem; opacity: 0.9; max-width: 600px; margin: 0 auto;">
+          Реальные фото установленных жалюзи и честные отзывы наших клиентов
+        </p>
+      </div>
+    </section>
+
+    <!-- Наши работы (Слайдер) -->
+    <section class="section" id="works">
+      <div class="container">
+        <h2 class="section-title">🖼️ Наши работы</h2>
+        
+        {loadError ? (
+          <div style="text-align: center; padding: 3rem; background: #FEF2F2; border-radius: 1rem; margin-bottom: 2rem;">
+            <p style="color: #DC2626;">Не удалось загрузить работы</p>
+          </div>
+        ) : works.length === 0 ? (
+          <div style="text-align: center; padding: 3rem; background: #F1F5F9; border-radius: 1rem;">
+            <p style="color: #64748B;">Работы пока не добавлены</p>
+          </div>
+        ) : (
+          <>
+            <div class="works-slider" style="position: relative; overflow: hidden; border-radius: 1rem; box-shadow: var(--shadow-lg);">
+              <div class="works-track" style="display: flex; transition: transform 0.5s ease;">
+                {works.map((work, i) => (
+                  <div class="work-slide" style="min-width: 100%; position: relative;">
+                    <img 
+                      src={work.photo} 
+                      alt={work.title || 'Наши работы'}
+                      loading="lazy"
+                      style="width: 100%; height: 400px; object-fit: cover;"
+                    />
+                    {work.title && (
+                      <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.7)); padding: 2rem 1.5rem 1.5rem; color: white;">
+                        <p style="font-size: 1.2rem; font-weight: 600; margin: 0;">{work.title}</p>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+              
+              <!-- Кнопки навигации (без onclick, используем data-атрибуты) -->
+              <button class="slider-prev" data-slider-prev style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.9); border: none; border-radius: 50%; width: 48px; height: 48px; font-size: 1.5rem; cursor: pointer; box-shadow: var(--shadow-md);">‹</button>
+              <button class="slider-next" data-slider-next style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.9); border: none; border-radius: 50%; width: 48px; height: 48px; font-size: 1.5rem; cursor: pointer; box-shadow: var(--shadow-md);">›</button>
+              
+              <!-- Индикаторы -->
+              <div class="slider-dots" style="position: absolute; bottom: 1rem; left: 50%; transform: translateX(-50%); display: flex; gap: 0.5rem;">
+                {works.map((_, i) => (
+                  <button 
+                    class="slider-dot"
+                    data-slide-dot={i}
+                    style="width: 12px; height: 12px; border-radius: 50%; border: 2px solid white; background: transparent; cursor: pointer;"
+                  />
+                ))}
+              </div>
+            </div>
+            
+            <p style="text-align: center; margin-top: 1rem; color: var(--color-text-muted);">
+              {works.length} {works.length === 1 ? 'работа' : works.length < 5 ? 'работы' : 'работ'} в нашем портфолио
+            </p>
+          </>
+        )}
+      </div>
+    </section>
+
+    <!-- Отзывы -->
+    <section class="section" id="reviews" style="background: var(--color-bg-alt);">
+      <div class="container">
+        <h2 class="section-title">📝 Отзывы клиентов</h2>
+        
+        {loadError ? (
+          <div style="text-align: center; padding: 3rem; background: #FEF2F2; border-radius: 1rem; margin-bottom: 2rem;">
+            <p style="color: #DC2626;">Не удалось загрузить отзывы</p>
+          </div>
+        ) : reviews.length === 0 ? (
+          <div style="text-align: center; padding: 3rem; background: #F1F5F9; border-radius: 1rem;">
+            <p style="color: #64748B;">Отзывов пока нет</p>
+          </div>
+        ) : (
+          <div class="reviews-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; margin-bottom: 3rem;">
+            {reviews.map(review => (
+              <div class="review-card" style="background: white; padding: 1.5rem; border-radius: 1rem; box-shadow: var(--shadow-md);">
+                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                  <div style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 1.2rem;">
+                    {review.name.charAt(0)}
+                  </div>
+                  <div>
+                    <div style="font-weight: 600; color: var(--color-text);">{review.name}</div>
+                    <div style="font-size: 0.9rem; color: var(--color-text-muted);">{review.blindsType}</div>
+                  </div>
+                  <div style="margin-left: auto; display: flex; gap: 0.25rem;">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <span style={i < review.rating ? 'color: #FBBF24;' : 'color: #D1D5DB;'}>★</span>
+                    ))}
+                  </div>
+                </div>
+                
+                <p style="color: var(--color-text); line-height: 1.7; margin-bottom: 1rem;">{review.comment}</p>
+                
+                {review.photos && review.photos.length > 0 && (
+                  <div style="display: flex; gap: 0.5rem; overflow-x: auto; padding-bottom: 0.5rem;">
+                    {review.photos.map((photo, i) => (
+                      <img 
+                        src={photo} 
+                        alt={`Фото отзыва ${i + 1}`}
+                        loading="lazy"
+                        style="width: 80px; height: 80px; object-fit: cover; border-radius: 0.5rem; flex-shrink: 0;"
+                      />
+                    ))}
+                  </div>
+                )}
+                
+                <div style="font-size: 0.85rem; color: var(--color-text-muted); margin-top: 1rem;">
+                  {new Date(review.created_at).toLocaleDateString('ru-RU', { year: 'numeric', month: 'long', day: 'numeric' })}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+        
+        <!-- Форма добавления отзыва -->
+        <div class="review-form-container" style="max-width: 600px; margin: 0 auto; background: white; padding: 2rem; border-radius: 1rem; box-shadow: var(--shadow-lg);">
+          <h3 style="font-size: 1.5rem; margin-bottom: 1.5rem; text-align: center;">Оставить отзыв</h3>
+          
+          <form id="review-form" style="display: flex; flex-direction: column; gap: 1rem;">
+            <div>
+              <label for="review-name" style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: var(--color-text);">Ваше имя *</label>
+              <input 
+                type="text" 
+                id="review-name" 
+                name="name" 
+                required
+                placeholder="Иван Иванов"
+                style="width: 100%; padding: 0.75rem 1rem; border: 2px solid #E2E8F0; border-radius: 0.5rem; font-size: 1rem; transition: border-color 0.3s;"
+              />
+            </div>
+            
+            <div>
+              <label for="review-type" style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: var(--color-text);">Тип жалюзи *</label>
+              <select 
+                id="review-type" 
+                name="blindsType" 
+                required
+                style="width: 100%; padding: 0.75rem 1rem; border: 2px solid #E2E8F0; border-radius: 0.5rem; font-size: 1rem; transition: border-color 0.3s;"
+              >
+                <option value="">Выберите тип</option>
+                <option value="Рулонные">Рулонные</option>
+                <option value="Вертикальные">Вертикальные</option>
+                <option value="Горизонтальные">Горизонтальные</option>
+                <option value="Другое">Другое</option>
+              </select>
+            </div>
+            
+            <div>
+              <label for="review-rating" style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: var(--color-text);">Оценка *</label>
+              <select 
+                id="review-rating" 
+                name="rating" 
+                required
+                style="width: 100%; padding: 0.75rem 1rem; border: 2px solid #E2E8F0; border-radius: 0.5rem; font-size: 1rem; transition: border-color 0.3s;"
+              >
+                <option value="5">⭐⭐⭐⭐⭐ (5) - Отлично</option>
+                <option value="4">⭐⭐⭐⭐ (4) - Хорошо</option>
+                <option value="3">⭐⭐⭐ (3) - Нормально</option>
+                <option value="2">⭐⭐ (2) - Плохо</option>
+                <option value="1">⭐ (1) - Ужасно</option>
+              </select>
+            </div>
+            
+            <div>
+              <label for="review-comment" style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: var(--color-text);">Ваш отзыв *</label>
+              <textarea 
+                id="review-comment" 
+                name="comment" 
+                required
+                rows="4"
+                placeholder="Расскажите о вашем опыте..."
+                style="width: 100%; padding: 0.75rem 1rem; border: 2px solid #E2E8F0; border-radius: 0.5rem; font-size: 1rem; transition: border-color 0.3s; resize: vertical;"
+              ></textarea>
+            </div>
+            
+            <button 
+              type="submit" 
+              style="background: var(--color-primary); color: white; border: none; padding: 1rem 2rem; border-radius: 0.5rem; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 6px rgba(37,99,235,0.3);"
+            >
+              Отправить отзыв
+            </button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="section" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-align: center;">
+      <div class="container">
+        <h2 style="font-size: 2rem; margin-bottom: 1rem;">Хотите так же?</h2>
+        <p style="font-size: 1.2rem; margin-bottom: 2rem; opacity: 0.9;">Закажите жалюзи прямо сейчас и получите скидку 10%!</p>
+        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+          <a href="/catalog" class="btn btn-primary" style="background: white; color: #667eea;">Смотреть каталог</a>
+          <button data-open-order-modal class="btn" style="background: transparent; border: 2px solid white; color: white;">Заказать замер</button>
+        </div>
+      </div>
+    </section>
+  </main>
+  
+  <Footer />
+</BaseLayout>
+
+<script>
+  // === СЛАЙДЕР ===
+  let currentSlide = 0;
+  const track = document.querySelector('.works-track');
+  const dots = document.querySelectorAll('[data-slide-dot]');
+  const totalSlides = document.querySelectorAll('.work-slide').length;
+  let autoSlide;
+
+  function updateSlider() {
+    if (track) {
+      track.style.transform = `translateX(-${currentSlide * 100}%)`;
+    }
+    dots.forEach((dot, i) => {
+      dot.style.background = i === currentSlide ? 'white' : 'transparent';
+    });
+  }
+
+  function slideWorks(direction) {
+    currentSlide = (currentSlide + direction + totalSlides) % totalSlides;
+    updateSlider();
+  }
+
+  function goToSlide(index) {
+    currentSlide = index;
+    updateSlider();
+  }
+
+  // Инициализация слайдера
+  if (totalSlides > 0) {
+    // Кнопки навигации
+    const prevBtn = document.querySelector('[data-slider-prev]');
+    const nextBtn = document.querySelector('[data-slider-next]');
+    
+    if (prevBtn) prevBtn.addEventListener('click', () => slideWorks(-1));
+    if (nextBtn) nextBtn.addEventListener('click', () => slideWorks(1));
+    
+    // Точки
+    dots.forEach((dot, i) => {
+      dot.addEventListener('click', () => goToSlide(i));
+    });
+    
+    // Автопереключение
+    autoSlide = setInterval(() => slideWorks(1), 5000);
+    
+    // Остановка при наведении
+    const slider = document.querySelector('.works-slider');
+    if (slider) {
+      slider.addEventListener('mouseenter', () => clearInterval(autoSlide));
+      slider.addEventListener('mouseleave', () => { autoSlide = setInterval(() => slideWorks(1), 5000); });
+    }
+    
+    updateSlider();
+  }
+
+  // === ФОРМА ОТЗЫВА ===
+  const reviewForm = document.getElementById('review-form');
+  if (reviewForm) {
+    reviewForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const form = e.target;
+      const btn = form.querySelector('button[type="submit"]');
+      const originalText = btn.textContent;
+      
+      btn.textContent = 'Отправка...';
+      btn.disabled = true;
+      
+      try {
+        const API_URL = document.body.dataset.apiUrl || 'http://localhost:3001';
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData);
+        data.rating = parseInt(data.rating);
+        
+        const response = await fetch(API_URL + '/api/reviews', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          alert('Спасибо! Ваш отзыв отправлен на модерацию.');
+          form.reset();
+          location.reload();
+        } else {
+          alert('Ошибка: ' + (result.error || 'Не удалось отправить'));
+        }
+      } catch (error) {
+        console.error('Review error:', error);
+        alert('Ошибка соединения. Проверьте, что сервер запущен.');
+      } finally {
+        btn.textContent = originalText;
+        btn.disabled = false;
+      }
+    });
+  }
+
+  // === СТИЛИ ИНПУТОВ ===
+  document.querySelectorAll('input, select, textarea').forEach(el => {
+    el.addEventListener('focus', () => el.style.borderColor = 'var(--color-primary)');
+    el.addEventListener('blur', () => el.style.borderColor = '#E2E8F0');
+  });
+</script>
+
+<style>
+  /* Адаптивы */
+  @media (max-width: 768px) {
+    .section-title { font-size: 1.75rem !important; }
+    .works-slider img { height: 250px !important; }
+    .slider-prev, .slider-next { width: 40px !important; height: 40px !important; font-size: 1.25rem !important; }
+    .reviews-grid { grid-template-columns: 1fr !important; }
+    .review-form-container { padding: 1.5rem !important; }
+    h1 { font-size: 1.75rem !important; }
+  }
+
+  @media (max-width: 480px) {
+    .works-slider img { height: 200px !important; }
+    .btn { width: 100% !important; }
+  }
+
+  /* Hover эффекты */
+  .review-card { transition: transform 0.3s, box-shadow 0.3s; }
+  .review-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+  .slider-dot:hover { background: rgba(255,255,255,0.5); }
+  button:hover { opacity: 0.9; }
+
+  /* Плавная прокрутка */
+  html { scroll-behavior: smooth; }
+</style>

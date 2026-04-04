@@ -1,4 +1,4 @@
-const DEFAULT_API_URL = 'http://localhost:3001';
+const DEFAULT_API_URL = 'https://piter-jaluzi-backend.onrender.com';
 const DEFAULT_TIMEOUT_MS = 10000;
 
 export function getApiUrl() {

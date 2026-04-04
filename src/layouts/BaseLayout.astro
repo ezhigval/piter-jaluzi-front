@@ -9,7 +9,7 @@ const {
   canonical = '/'
 } = Astro.props;
 
-const API_URL = import.meta.env.PUBLIC_API_URL || 'http://localhost:3001';
+const API_URL = import.meta.env.PUBLIC_API_URL || 'https://piter-jaluzi-backend.onrender.com';
 const SITE_URL = import.meta.env.SITE_URL || Astro.site?.toString() || 'https://piter-jaluzi.ru';
 const canonicalUrl = new URL(canonical, SITE_URL).toString();
 ---

@@ -1,9 +1,11 @@
 ---
+import config from '../../data/config.json';
+
 const features = [
   { icon: '📏', title: 'Бесплатный замер', desc: 'Приедем в удобное время' },
-  { icon: '🛡️', title: 'Гарантия 1 год', desc: 'На все виды изделий' },
+  { icon: '🛡️', title: `Гарантия ${config.stats.warranty}`, desc: 'На все виды изделий' },
   { icon: '⚡', title: 'Производство 3 дня', desc: 'Собственный цех' },
-  { icon: '🏆', title: 'На рынке 18 лет', desc: 'С 2006 года' },
+  { icon: '🏆', title: `На рынке ${config.stats.years} лет`, desc: `С ${config.company.since} года` },
 ];
 ---
 <section style="padding:4rem 1.5rem;background:#F8FAFC;">

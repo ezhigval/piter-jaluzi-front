@@ -4,28 +4,6 @@ import Header from '../components/layout/Header.astro';
 import Footer from '../components/layout/Footer.astro';
 import OrderModal from '../components/ui/OrderModal.astro';
 import config from '../data/config.json';
-
-const API_URL = import.meta.env.PUBLIC_API_URL || 'http://localhost:3001';
-
-let works = [];
-let reviews = [];
-let loadError = false;
-
-try {
-  const [worksRes, reviewsRes] = await Promise.all([
-    fetch(API_URL + '/api/reviews/works'),
-    fetch(API_URL + '/api/reviews')
-  ]);
-  
-  const worksData = await worksRes.json();
-  const reviewsData = await reviewsRes.json();
-  
-  if (worksData.success) works = worksData.data;
-  if (reviewsData.success) reviews = reviewsData.data;
-} catch (error) {
-  console.error('Failed to load works/reviews:', error);
-  loadError = true;
-}
 ---
 <BaseLayout 
   title={`Наши работы и отзывы | ${config.company.name}`}
@@ -50,57 +28,9 @@ try {
     <section class="section" id="works">
       <div class="container">
         <h2 class="section-title">🖼️ Наши работы</h2>
-        
-        {loadError ? (
-          <div style="text-align: center; padding: 3rem; background: #FEF2F2; border-radius: 1rem; margin-bottom: 2rem;">
-            <p style="color: #DC2626;">Не удалось загрузить работы</p>
-          </div>
-        ) : works.length === 0 ? (
-          <div style="text-align: center; padding: 3rem; background: #F1F5F9; border-radius: 1rem;">
-            <p style="color: #64748B;">Работы пока не добавлены</p>
-          </div>
-        ) : (
-          <>
-            <div class="works-slider" style="position: relative; overflow: hidden; border-radius: 1rem; box-shadow: var(--shadow-lg);">
-              <div class="works-track" style="display: flex; transition: transform 0.5s ease;">
-                {works.map((work, i) => (
-                  <div class="work-slide" style="min-width: 100%; position: relative;">
-                    <img 
-                      src={work.photo} 
-                      alt={work.title || 'Наши работы'}
-                      loading="lazy"
-                      style="width: 100%; height: 400px; object-fit: cover;"
-                    />
-                    {work.title && (
-                      <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.7)); padding: 2rem 1.5rem 1.5rem; color: white;">
-                        <p style="font-size: 1.2rem; font-weight: 600; margin: 0;">{work.title}</p>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-              
-              <!-- Кнопки навигации (без onclick, используем data-атрибуты) -->
-              <button class="slider-prev" data-slider-prev style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.9); border: none; border-radius: 50%; width: 48px; height: 48px; font-size: 1.5rem; cursor: pointer; box-shadow: var(--shadow-md);">‹</button>
-              <button class="slider-next" data-slider-next style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.9); border: none; border-radius: 50%; width: 48px; height: 48px; font-size: 1.5rem; cursor: pointer; box-shadow: var(--shadow-md);">›</button>
-              
-              <!-- Индикаторы -->
-              <div class="slider-dots" style="position: absolute; bottom: 1rem; left: 50%; transform: translateX(-50%); display: flex; gap: 0.5rem;">
-                {works.map((_, i) => (
-                  <button 
-                    class="slider-dot"
-                    data-slide-dot={i}
-                    style="width: 12px; height: 12px; border-radius: 50%; border: 2px solid white; background: transparent; cursor: pointer;"
-                  />
-                ))}
-              </div>
-            </div>
-            
-            <p style="text-align: center; margin-top: 1rem; color: var(--color-text-muted);">
-              {works.length} {works.length === 1 ? 'работа' : works.length < 5 ? 'работы' : 'работ'} в нашем портфолио
-            </p>
-          </>
-        )}
+
+        <div id="works-state" class="section-placeholder">Загружаем работы...</div>
+        <div id="works-slider-root"></div>
       </div>
     </section>
 
@@ -108,56 +38,9 @@ try {
     <section class="section" id="reviews" style="background: var(--color-bg-alt);">
       <div class="container">
         <h2 class="section-title">📝 Отзывы клиентов</h2>
-        
-        {loadError ? (
-          <div style="text-align: center; padding: 3rem; background: #FEF2F2; border-radius: 1rem; margin-bottom: 2rem;">
-            <p style="color: #DC2626;">Не удалось загрузить отзывы</p>
-          </div>
-        ) : reviews.length === 0 ? (
-          <div style="text-align: center; padding: 3rem; background: #F1F5F9; border-radius: 1rem;">
-            <p style="color: #64748B;">Отзывов пока нет</p>
-          </div>
-        ) : (
-          <div class="reviews-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; margin-bottom: 3rem;">
-            {reviews.map(review => (
-              <div class="review-card" style="background: white; padding: 1.5rem; border-radius: 1rem; box-shadow: var(--shadow-md);">
-                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
-                  <div style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 1.2rem;">
-                    {review.name.charAt(0)}
-                  </div>
-                  <div>
-                    <div style="font-weight: 600; color: var(--color-text);">{review.name}</div>
-                    <div style="font-size: 0.9rem; color: var(--color-text-muted);">{review.blindsType}</div>
-                  </div>
-                  <div style="margin-left: auto; display: flex; gap: 0.25rem;">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <span style={i < review.rating ? 'color: #FBBF24;' : 'color: #D1D5DB;'}>★</span>
-                    ))}
-                  </div>
-                </div>
-                
-                <p style="color: var(--color-text); line-height: 1.7; margin-bottom: 1rem;">{review.comment}</p>
-                
-                {review.photos && review.photos.length > 0 && (
-                  <div style="display: flex; gap: 0.5rem; overflow-x: auto; padding-bottom: 0.5rem;">
-                    {review.photos.map((photo, i) => (
-                      <img 
-                        src={photo} 
-                        alt={`Фото отзыва ${i + 1}`}
-                        loading="lazy"
-                        style="width: 80px; height: 80px; object-fit: cover; border-radius: 0.5rem; flex-shrink: 0;"
-                      />
-                    ))}
-                  </div>
-                )}
-                
-                <div style="font-size: 0.85rem; color: var(--color-text-muted); margin-top: 1rem;">
-                  {new Date(review.created_at).toLocaleDateString('ru-RU', { year: 'numeric', month: 'long', day: 'numeric' })}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+
+        <div id="reviews-state" class="section-placeholder">Загружаем отзывы...</div>
+        <div id="reviews-grid" class="reviews-grid" hidden></div>
         
         <!-- Форма добавления отзыва -->
         <div class="review-form-container" style="max-width: 600px; margin: 0 auto; background: white; padding: 2rem; border-radius: 1rem; box-shadow: var(--shadow-lg);">
@@ -226,6 +109,7 @@ try {
             >
               Отправить отзыв
             </button>
+            <p id="review-form-status" class="form-status" aria-live="polite"></p>
           </form>
         </div>
       </div>
@@ -246,110 +130,6 @@ try {
   
   <Footer />
 </BaseLayout>
-
-<script>
-  // === СЛАЙДЕР ===
-  let currentSlide = 0;
-  const track = document.querySelector('.works-track');
-  const dots = document.querySelectorAll('[data-slide-dot]');
-  const totalSlides = document.querySelectorAll('.work-slide').length;
-  let autoSlide;
-
-  function updateSlider() {
-    if (track) {
-      track.style.transform = `translateX(-${currentSlide * 100}%)`;
-    }
-    dots.forEach((dot, i) => {
-      dot.style.background = i === currentSlide ? 'white' : 'transparent';
-    });
-  }
-
-  function slideWorks(direction) {
-    currentSlide = (currentSlide + direction + totalSlides) % totalSlides;
-    updateSlider();
-  }
-
-  function goToSlide(index) {
-    currentSlide = index;
-    updateSlider();
-  }
-
-  // Инициализация слайдера
-  if (totalSlides > 0) {
-    // Кнопки навигации
-    const prevBtn = document.querySelector('[data-slider-prev]');
-    const nextBtn = document.querySelector('[data-slider-next]');
-    
-    if (prevBtn) prevBtn.addEventListener('click', () => slideWorks(-1));
-    if (nextBtn) nextBtn.addEventListener('click', () => slideWorks(1));
-    
-    // Точки
-    dots.forEach((dot, i) => {
-      dot.addEventListener('click', () => goToSlide(i));
-    });
-    
-    // Автопереключение
-    autoSlide = setInterval(() => slideWorks(1), 5000);
-    
-    // Остановка при наведении
-    const slider = document.querySelector('.works-slider');
-    if (slider) {
-      slider.addEventListener('mouseenter', () => clearInterval(autoSlide));
-      slider.addEventListener('mouseleave', () => { autoSlide = setInterval(() => slideWorks(1), 5000); });
-    }
-    
-    updateSlider();
-  }
-
-  // === ФОРМА ОТЗЫВА ===
-  const reviewForm = document.getElementById('review-form');
-  if (reviewForm) {
-    reviewForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const form = e.target;
-      const btn = form.querySelector('button[type="submit"]');
-      const originalText = btn.textContent;
-      
-      btn.textContent = 'Отправка...';
-      btn.disabled = true;
-      
-      try {
-        const API_URL = document.body.dataset.apiUrl || 'http://localhost:3001';
-        const formData = new FormData(form);
-        const data = Object.fromEntries(formData);
-        data.rating = parseInt(data.rating);
-        
-        const response = await fetch(API_URL + '/api/reviews', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data)
-        });
-        
-        const result = await response.json();
-        
-        if (result.success) {
-          alert('Спасибо! Ваш отзыв отправлен на модерацию.');
-          form.reset();
-          location.reload();
-        } else {
-          alert('Ошибка: ' + (result.error || 'Не удалось отправить'));
-        }
-      } catch (error) {
-        console.error('Review error:', error);
-        alert('Ошибка соединения. Проверьте, что сервер запущен.');
-      } finally {
-        btn.textContent = originalText;
-        btn.disabled = false;
-      }
-    });
-  }
-
-  // === СТИЛИ ИНПУТОВ ===
-  document.querySelectorAll('input, select, textarea').forEach(el => {
-    el.addEventListener('focus', () => el.style.borderColor = 'var(--color-primary)');
-    el.addEventListener('blur', () => el.style.borderColor = '#E2E8F0');
-  });
-</script>
 
 <style>
   /* Адаптивы */

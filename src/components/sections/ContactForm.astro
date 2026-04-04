@@ -7,7 +7,15 @@ import config from '../../data/config.json';
     
     <div class="contacts-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-bottom:3rem;">
       <div class="contacts-map" style="background:white;padding:0.5rem;border-radius:1rem;box-shadow:var(--shadow-md);overflow:hidden;height:400px;">
-        <div id="yandex-map" style="width:100%;height:100%;"></div>
+        <div
+          id="yandex-map"
+          data-company={config.company.name}
+          data-address={config.company.address}
+          data-phone={config.company.phone}
+          data-lat="59.914195"
+          data-lng="30.344461"
+          style="width:100%;height:100%;"
+        ></div>
       </div>
       
       <div class="contacts-info" style="background:white;padding:2rem;border-radius:1rem;box-shadow:var(--shadow-md);">
@@ -37,47 +45,11 @@ import config from '../../data/config.json';
           </div>
         </div>
         
-        <button data-open-order-modal style="display:block;width:100%;text-align:center;padding:1rem;background:var(--color-primary);color:white;border:none;border-radius:0.5rem;font-weight:600;font-size:1rem;cursor:pointer;box-shadow:0 4px 6px rgba(37,99,235,0.3);">Заказать жалюзи</button>
+        <button data-open-order-modal type="button" style="display:block;width:100%;text-align:center;padding:1rem;background:var(--color-primary);color:white;border:none;border-radius:0.5rem;font-weight:600;font-size:1rem;cursor:pointer;box-shadow:0 4px 6px rgba(37,99,235,0.3);">Заказать жалюзи</button>
       </div>
     </div>
   </div>
 </section>
-
-<script>
-  // Yandex Maps
-  (function() {
-    const mapContainer = document.getElementById('yandex-map');
-    if (!mapContainer) return;
-    
-    const script = document.createElement('script');
-    script.src = 'https://api-maps.yandex.ru/2.1/?lang=ru_RU';
-    script.async = true;
-    script.onload = function() {
-      if (typeof ymaps === 'undefined') return;
-      
-      ymaps.ready(function() {
-        // Координаты: Санкт-Петербург, Боровая 52А
-        var myMap = new ymaps.Map('yandex-map', {
-          center: [59.914195, 30.344461],
-          zoom: 17,
-          controls: ['zoomControl', 'fullscreenControl']
-        });
-        
-        var myPlacemark = new ymaps.Placemark([59.914195, 30.344461], {
-          hintContent: 'ПроЖалюзи',
-          balloonContent: '<strong>ПроЖалюзи</strong><br>Санкт-Петербург, Боровая 52А<br>📞 {config.company.phone}'
-        }, {
-          preset: 'islands#blueStretchyIcon'
-        });
-        
-        myMap.geoObjects.add(myPlacemark);
-        myMap.setCenter([59.914195, 30.344461], 17);
-      });
-    };
-    
-    document.head.appendChild(script);
-  })();
-</script>
 
 <style>
   @media (max-width: 768px) {

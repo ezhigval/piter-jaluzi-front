@@ -8,79 +8,36 @@ const navItems = [
   { href: '/#contacts', label: 'Контакты' }
 ];
 ---
-<header class="header" style="position:fixed;top:0;left:0;right:0;z-index:1000;background:var(--color-bg);box-shadow:var(--shadow-sm);">
-  <div class="container" style="display:flex;align-items:center;justify-content:space-between;padding:1rem 0;">
-    <a href="/" style="font-size:1.5rem;font-weight:bold;color:var(--color-primary);text-decoration:none;">🪟 ПроЖалюзи</a>
+<header class="header">
+  <div class="container header-inner">
+    <a href="/" class="header-logo">🪟 {config.company.name}</a>
     
-    <nav class="desktop-nav" style="display:flex;gap:2rem;">
+    <nav class="desktop-nav" aria-label="Основная навигация">
       {navItems.map(item => (
-        <a href={item.href} style="color:var(--color-text);text-decoration:none;font-weight:500;transition:color 0.3s;" onmouseover="this.style.color='var(--color-primary)'" onmouseout="this.style.color='var(--color-text)'">{item.label}</a>
+        <a href={item.href} class="header-link">{item.label}</a>
       ))}
     </nav>
     
-    <div class="header-actions" style="display:flex;align-items:center;gap:1rem;">
-      <a href={`tel:${config.company.phone}`} style="font-weight:600;color:var(--color-primary);text-decoration:none;display:none;" class="desktop-only">{config.company.phone}</a>
-      <button data-open-order-modal class="btn btn-primary" style="padding:0.75rem 1.5rem;">Заказать</button>
-      <button class="mobile-menu-btn" id="mobile-menu-btn" style="display:none;background:none;border:none;font-size:1.5rem;cursor:pointer;" aria-label="Меню">☰</button>
+    <div class="header-actions">
+      <a href={`tel:${config.company.phone}`} class="header-phone desktop-only">{config.company.phone}</a>
+      <button data-open-order-modal class="btn btn-primary header-btn" type="button">Заказать</button>
+      <button
+        class="mobile-menu-btn"
+        id="mobile-menu-btn"
+        type="button"
+        aria-label="Меню"
+        aria-controls="mobile-nav"
+        aria-expanded="false"
+      >
+        ☰
+      </button>
     </div>
   </div>
   
-  <nav class="mobile-nav" id="mobile-nav" style="display:none;position:fixed;top:60px;left:0;right:0;background:var(--color-bg);box-shadow:var(--shadow-lg);padding:1rem;">
+  <nav class="mobile-nav" id="mobile-nav" aria-label="Мобильная навигация" hidden>
     {navItems.map(item => (
-      <a href={item.href} class="mobile-nav-link" style="display:block;padding:1rem;color:var(--color-text);text-decoration:none;font-weight:500;border-bottom:1px solid #E2E8F0;">{item.label}</a>
+      <a href={item.href} class="mobile-nav-link">{item.label}</a>
     ))}
-    <a href={`tel:${config.company.phone}`} style="display:block;padding:1rem;color:var(--color-primary);text-decoration:none;font-weight:600;">📞 {config.company.phone}</a>
+    <a href={`tel:${config.company.phone}`} class="mobile-nav-link header-phone">📞 {config.company.phone}</a>
   </nav>
 </header>
-
-<script>
-  const mobileBtn = document.getElementById('mobile-menu-btn');
-  const mobileNav = document.getElementById('mobile-nav');
-  const mobileLinks = document.querySelectorAll('.mobile-nav-link');
-
-  function toggleMobileMenu() {
-    if (mobileNav.style.display === 'none' || !mobileNav.style.display) {
-      mobileNav.style.display = 'block';
-      mobileBtn.textContent = '✕';
-    } else {
-      mobileNav.style.display = 'none';
-      mobileBtn.textContent = '☰';
-    }
-  }
-
-  if (mobileBtn) {
-    mobileBtn.addEventListener('click', toggleMobileMenu);
-  }
-
-  mobileLinks.forEach(link => {
-    link.addEventListener('click', () => {
-      mobileNav.style.display = 'none';
-      mobileBtn.textContent = '☰';
-    });
-  });
-
-  // Responsive
-  function handleResize() {
-    if (window.innerWidth <= 768) {
-      mobileBtn.style.display = 'block';
-      document.querySelector('.desktop-nav').style.display = 'none';
-      document.querySelector('.desktop-only').style.display = 'none';
-    } else {
-      mobileBtn.style.display = 'none';
-      document.querySelector('.desktop-nav').style.display = 'flex';
-      document.querySelector('.desktop-only').style.display = 'block';
-      mobileNav.style.display = 'none';
-    }
-  }
-
-  handleResize();
-  window.addEventListener('resize', handleResize);
-</script>
-
-<style>
-  @media (max-width: 768px) {
-    .desktop-nav { display: none !important; }
-    .desktop-only { display: none !important; }
-    .mobile-menu-btn { display: block !important; }
-  }
-</style>

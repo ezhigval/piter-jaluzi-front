@@ -13,13 +13,14 @@ import config from '../../data/config.json';
       <input type="tel" name="phone" placeholder="Телефон" required class="modal-input" />
       <select name="blindsType" required class="modal-input modal-select">
         <option value="" disabled selected>Тип жалюзи</option>
-        <option value="roller">Рулонные</option>
-        <option value="vertical">Вертикальные</option>
-        <option value="horizontal">Горизонтальные</option>
-        <option value="other">Другое</option>
+        <option value="Рулонные">Рулонные</option>
+        <option value="Вертикальные">Вертикальные</option>
+        <option value="Горизонтальные">Горизонтальные</option>
+        <option value="Другое">Другое</option>
       </select>
       <textarea name="message" rows="3" placeholder="Комментарий" class="modal-textarea"></textarea>
       <button type="submit" class="btn btn-primary">Отправить заявку</button>
+      <p id="order-form-status" class="form-status" aria-live="polite"></p>
     </form>
     <div class="modal-footer">
       <p>📞 {config.company.phone}</p>

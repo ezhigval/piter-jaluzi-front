@@ -1,15 +1,26 @@
+import { fetchJson, setStatus } from '/scripts/api.js';
+import { lockScroll, unlockScroll } from '/scripts/scroll-lock.js';
+
 export function initOrderModal() {
   const orderModal = document.getElementById('order-modal');
   const orderModalClose = document.getElementById('order-modal-close');
   const orderForm = document.getElementById('order-form');
-  
-  const API_URL = document.body.dataset.apiUrl || 'http://localhost:3001';
+  const statusEl = document.getElementById('order-form-status');
 
   window.openOrderModal = function() {
-    if (orderModal) { orderModal.style.display = 'flex'; document.body.style.overflow = 'hidden'; }
+    if (orderModal) {
+      orderModal.style.display = 'flex';
+      lockScroll('order-modal');
+      setStatus(statusEl, '');
+    }
   };
+
   window.closeOrderModal = function() {
-    if (orderModal) { orderModal.style.display = 'none'; document.body.style.overflow = ''; }
+    if (orderModal) {
+      orderModal.style.display = 'none';
+      unlockScroll('order-modal');
+      setStatus(statusEl, '');
+    }
   };
   
   if (orderModalClose) orderModalClose.addEventListener('click', window.closeOrderModal);
@@ -27,34 +38,36 @@ export function initOrderModal() {
   if (orderForm) {
     orderForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const form = e.target;
+      const form = e.currentTarget;
       const btn = form.querySelector('button[type="submit"]');
       const originalText = btn.textContent;
+
+      setStatus(statusEl, '');
       btn.textContent = 'Отправка...';
       btn.disabled = true;
+
       try {
-        console.log('Sending to:', API_URL + '/api/orders');
         const formData = new FormData(form);
-        const data = Object.fromEntries(formData);
-        const response = await fetch(API_URL + '/api/orders', { 
+        const data = Object.fromEntries(formData.entries());
+
+        await fetchJson('/api/orders', {
           method: 'POST', 
-          headers: { 'Content-Type': 'application/json' }, 
           body: JSON.stringify(data) 
         });
-        const result = await response.json();
-        console.log('Response:', result);
-        if (result.success) { 
-          alert('Спасибо! Заявка отправлена.'); 
-          form.reset(); 
-          window.closeOrderModal(); 
-        }
-        else { alert('Ошибка: ' + (result.error || 'Не удалось отправить')); }
-      } catch (error) { 
+
+        setStatus(statusEl, 'Спасибо! Заявка отправлена.', 'success');
+        form.reset();
+        setTimeout(() => window.closeOrderModal(), 800);
+      } catch (error) {
         console.error('Order error:', error);
-        alert('Ошибка соединения. Проверьте, что сервер запущен на порту 3001.'); 
+        setStatus(statusEl, error.message || 'Не удалось отправить заявку.', 'error');
       }
-      finally { btn.textContent = originalText; btn.disabled = false; }
+      finally {
+        btn.textContent = originalText;
+        btn.disabled = false;
+      }
     });
   }
+
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') window.closeOrderModal(); });
 }

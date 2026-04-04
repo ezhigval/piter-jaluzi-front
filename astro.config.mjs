@@ -1,9 +1,8 @@
 import { defineConfig } from 'astro/config';
-import sitemap from '@astrojs/sitemap';
 
 export default defineConfig({
-  site: 'https://prozhaluzi.ru',
-  integrations: [sitemap()],
+  site: process.env.SITE_URL || 'https://piter-jaluzi.ru',
+  output: 'static',
   image: {
     domains: ['images.unsplash.com', 'api.telegram.org']
   }

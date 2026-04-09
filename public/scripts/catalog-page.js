@@ -21,8 +21,10 @@ function renderPagination(totalItems) {
 
   const buttons = [];
 
+  // Кнопка "Назад"
   buttons.push(`<button class="btn page-btn" data-page="${currentPage - 1}" ${currentPage === 1 ? 'disabled' : ''}>◀</button>`);
 
+  // Номера страниц
   for (let i = 1; i <= totalPages; i++) {
     if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
       const active = i === currentPage ? 'style="background:#2563EB;color:white;border-color:#2563EB;"' : '';
@@ -32,10 +34,12 @@ function renderPagination(totalItems) {
     }
   }
 
+  // Кнопка "Вперёд"
   buttons.push(`<button class="btn page-btn" data-page="${currentPage + 1}" ${currentPage === totalPages ? 'disabled' : ''}>▶</button>`);
 
   pagination.innerHTML = buttons.join('');
 
+  // Обработчики кликов
   pagination.querySelectorAll('.page-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
       const page = parseInt(e.currentTarget.dataset.page);
@@ -43,6 +47,7 @@ function renderPagination(totalItems) {
         currentPage = page;
         renderProducts();
         renderPagination(filteredProducts.length);
+        // Плавный скролл к началу списка
         document.getElementById('products-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     });
@@ -78,44 +83,13 @@ function filterProducts(category) {
   renderProducts();
   renderPagination(filteredProducts.length);
 
+  // Обновляем визуальное состояние кнопок категорий
   document.querySelectorAll('#category-filters .btn').forEach(btn => {
     const isCat = btn.dataset.category === category;
     btn.style.background = isCat ? '#2563EB' : 'white';
     btn.style.color = isCat ? 'white' : '#0F172A';
     btn.style.borderColor = isCat ? '#2563EB' : '#CBD5E1';
   });
-}
-
-// Открытие единой модалки с данными товара
-function openUnifiedModal(product) {
-  const modal = document.getElementById('product-modal');
-  if (!modal) return;
-
-  document.getElementById('modal-img').dataset.assetSrc = product.image;
-  document.getElementById('modal-img').alt = product.name;
-  document.getElementById('modal-img').src = ''; // сброс для перезагрузки
-
-  document.getElementById('modal-category').textContent = product.category;
-  document.getElementById('modal-title').textContent = product.name;
-  document.getElementById('modal-desc').textContent = product.description || 'Подробное описание скоро появится.';
-  document.getElementById('modal-price').innerHTML = `от <strong>${product.price} ₽</strong>/м²`;
-
-  modal.hidden = false;
-  modal.style.display = 'flex';
-  if (typeof lockScroll === 'function') {
-    lockScroll('product-modal:unified');
-  }
-  hydrateAssetImages(modal);
-}
-
-function closeUnifiedModal() {
-  const modal = document.getElementById('product-modal');
-  if (!modal) return;
-  modal.hidden = true;
-  modal.style.display = 'none';
-  if (typeof unlockScroll === 'function') {
-    unlockScroll('product-modal:unified');
-  }
 }
 
 export async function initCatalogPage() {
@@ -134,6 +108,7 @@ export async function initCatalogPage() {
       return;
     }
 
+    // Инициализация фильтров
     if (filters) {
       filters.querySelectorAll('.btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -143,35 +118,9 @@ export async function initCatalogPage() {
       });
     }
 
+    // Первый рендер
     renderProducts();
     renderPagination(filteredProducts.length);
-
-    // Клик по карточке → открываем единую модалку
-    grid.addEventListener('click', (e) => {
-      const card = e.target.closest('.product-card');
-      if (!card) return;
-      const productId = card.dataset.productId;
-      const product = allProducts.find(p => String(p.id) === String(productId));
-      if (product) openUnifiedModal(product);
-    });
-
-    // Закрытие модалки: кнопка × или клик по оверлею
-    document.addEventListener('click', (e) => {
-      if (e.target.closest('[data-close-modal]')) {
-        closeUnifiedModal();
-      }
-      const modal = document.getElementById('product-modal');
-      if (e.target === modal) {
-        closeUnifiedModal();
-      }
-    });
-
-    // Закрытие по Escape
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        closeUnifiedModal();
-      }
-    });
 
   } catch (error) {
     console.error('Catalog page error:', error);

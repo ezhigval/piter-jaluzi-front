@@ -226,6 +226,67 @@ export function initWorksReviewsPage() {
     });
   });
 
+  // --- Логика превью фото ---
+  const photoInput = document.getElementById('review-photos');
+  const previewContainer = document.getElementById('review-photos-preview');
+  /** @type {File[]} */
+  let selectedPhotos = [];
+  const MAX_PHOTOS = 3;
+  const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 МБ
+
+  const renderPreviews = () => {
+    if (!(previewContainer instanceof HTMLElement)) {
+      return;
+    }
+    previewContainer.innerHTML = '';
+    selectedPhotos.forEach((file, index) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'review-photo-preview-item';
+        const img = document.createElement('img');
+        img.src = e.target?.result || '';
+        img.alt = `Превью ${index + 1}`;
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'remove-photo-btn';
+        removeBtn.innerHTML = '×';
+        removeBtn.setAttribute('aria-label', 'Удалить фото');
+        removeBtn.addEventListener('click', () => {
+          selectedPhotos.splice(index, 1);
+          renderPreviews();
+        });
+        wrapper.appendChild(img);
+        wrapper.appendChild(removeBtn);
+        previewContainer.appendChild(wrapper);
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  photoInput?.addEventListener('change', (event) => {
+    const input = event.currentTarget;
+    if (!(input instanceof HTMLInputElement) || !input.files) {
+      return;
+    }
+    const newFiles = Array.from(input.files);
+    const oversized = newFiles.filter((f) => f.size > MAX_FILE_SIZE);
+    if (oversized.length) {
+      setStatus(reviewStatus, `Файлы слишком большие (макс. 5 МБ): ${oversized.map((f) => f.name).join(', ')}`, 'error');
+      return;
+    }
+    const freeSlots = MAX_PHOTOS - selectedPhotos.length;
+    const toAdd = newFiles.slice(0, freeSlots);
+    if (toAdd.length < newFiles.length) {
+      setStatus(reviewStatus, `Можно прикрепить до ${MAX_PHOTOS} фото. Добавлено ${toAdd.length}.`, 'error');
+    }
+    selectedPhotos = [...selectedPhotos, ...toAdd];
+    renderPreviews();
+    input.value = ''; // сброс input чтобы можно было выбрать тот же файл
+    setStatus(reviewStatus, '', '');
+  });
+
+  // --- Отправка формы с фото ---
   reviewForm.addEventListener('submit', async (event) => {
     event.preventDefault();
 
@@ -242,18 +303,40 @@ export function initWorksReviewsPage() {
     setStatus(reviewStatus, '');
 
     try {
-      const formData = new FormData(form);
-      const data = Object.fromEntries(formData.entries());
+      const reviewData = {
+        name: form.querySelector('#review-name')?.value || '',
+        blindsType: form.querySelector('#review-type')?.value || '',
+        rating: Number(form.querySelector('#review-rating')?.value || 5),
+        comment: form.querySelector('#review-comment')?.value || ''
+      };
 
-      await fetchJson('/api/reviews', {
-        method: 'POST',
-        body: JSON.stringify({
-          ...data,
-          rating: Number(data.rating)
-        })
+      const formData = new FormData();
+      formData.append('name', reviewData.name);
+      formData.append('blindsType', reviewData.blindsType);
+      formData.append('rating', String(reviewData.rating));
+      formData.append('comment', reviewData.comment);
+
+      selectedPhotos.forEach((file) => {
+        formData.append('photos', file);
       });
 
+      const apiUrl = document.body.dataset.apiUrl || '';
+      const response = await fetch(`${apiUrl}/api/reviews`, {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.message || `Ошибка сервера: ${response.status}`);
+      }
+
       form.reset();
+      selectedPhotos = [];
+      if (previewContainer instanceof HTMLElement) {
+        previewContainer.innerHTML = '';
+      }
+      setStatus(reviewStatus, '', '');
       await loadPageData();
       setStatus(reviewStatus, 'Спасибо! Ваш отзыв отправлен.', 'success');
     } catch (error) {
